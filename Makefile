@@ -28,10 +28,10 @@ build: set-env
 
 test: fmt test-case
 test-case: set-env
-	$(GO_MOD) init
 	$(GOTEST) -race -cover -coverprofile=coverage.out $(GOPKGS)
 
 fmt:
+	$(GO_MOD) init
 	go fmt ./...
 
 .PHONY: all prepare compile test build
