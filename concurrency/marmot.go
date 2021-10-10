@@ -28,36 +28,36 @@ func NewMarmot(queueLength int, concurrentNum int) *Marmot {
 	}
 }
 
-func (w *Marmot) AddProcessor(processor Processor) {
-	w.workQueue <- processor
+func (m *Marmot) AddProcessor(processor Processor) {
+	m.workQueue <- processor
 }
 
-func (w *Marmot) StartWork() {
+func (m *Marmot) StartWork() {
 	qps := 0
-	for p := range w.workQueue {
+	for p := range m.workQueue {
 		process := p
-		if qps >= w.concurrentNum {
+		if qps >= m.concurrentNum {
 			time.Sleep(time.Second)
 			qps = 0
 		}
 
-		w.Add(1)
+		m.Add(1)
 		qps++
-		w.concurrency <- 1
+		m.concurrency <- 1
 
-		go w.doWork(process)
+		go m.doWork(process)
 	}
 }
 
-func (w *Marmot) doWork(p Processor) {
+func (m *Marmot) doWork(p Processor) {
 	start := time.Now()
 	defer func(start time.Time) {
 		cost := time.Since(start)
-		if cost < w.baselineTime {
-			time.Sleep(w.baselineTime - cost)
+		if cost < m.baselineTime {
+			time.Sleep(m.baselineTime - cost)
 		}
-		w.Done()
-		<-w.concurrency
+		m.Done()
+		<-m.concurrency
 	}(start)
 
 	p.PreProcess()
@@ -65,12 +65,12 @@ func (w *Marmot) doWork(p Processor) {
 	p.AfterProcess()
 }
 
-func (w *Marmot) CloseWorkQueue() {
-	close(w.workQueue)
+func (m *Marmot) CloseWorkQueue() {
+	close(m.workQueue)
 }
 
-func (w *Marmot) WaitForClose() {
-	w.Wait()
+func (m *Marmot) WaitForClose() {
+	m.Wait()
 }
 
 func calculateBaselineTime(num int) time.Duration {
