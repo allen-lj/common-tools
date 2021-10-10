@@ -3,5 +3,6 @@
 .svn
 .tmp
 .vscode
+*.out
 
 output*
