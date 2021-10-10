@@ -28,7 +28,7 @@ build: set-env
 
 test: fmt test-case
 test-case: set-env
-	$(GO_MOD) tidy
+	$(GO_MOD) init
 	$(GOTEST) -race -cover -coverprofile=coverage.out $(GOPKGS)
 
 fmt:
