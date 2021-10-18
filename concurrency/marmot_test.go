@@ -7,7 +7,6 @@ func TestNewMarmot(t *testing.T) {
 	m.AddProcessor(&MockProcessor{})
 	go m.StartWork()
 	m.WaitForClose()
-	m.CloseWorkQueue()
 }
 
 type MockProcessor struct {

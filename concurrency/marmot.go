@@ -1,16 +1,14 @@
 package concurrency
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
 
-type Processor interface {
-	PreProcess()
-	DoProcess()
-	AfterProcess()
-}
+var freshTime = time.Millisecond * 100
 
+// Marmot 采用同时并发执行，一般用于压测等同时并发场景
 type Marmot struct {
 	workQueue     chan Processor
 	concurrency   chan int
@@ -49,6 +47,26 @@ func (m *Marmot) StartWork() {
 	}
 }
 
+func (m *Marmot) WaitForClose() {
+	m.isEmptyQueue()
+	m.Wait()
+	m.closeWorkQueue()
+}
+
+// TODO: to be optimized
+func (m *Marmot) isEmptyQueue() {
+	t := time.NewTicker(freshTime)
+	for {
+		select {
+		case <-t.C:
+			fmt.Println(len(m.workQueue))
+			if len(m.workQueue) == 0 {
+				return
+			}
+		}
+	}
+}
+
 func (m *Marmot) doWork(p Processor) {
 	start := time.Now()
 	defer func(start time.Time) {
@@ -56,6 +74,7 @@ func (m *Marmot) doWork(p Processor) {
 		if cost < m.baselineTime {
 			time.Sleep(m.baselineTime - cost)
 		}
+
 		m.Done()
 		<-m.concurrency
 	}(start)
@@ -65,12 +84,8 @@ func (m *Marmot) doWork(p Processor) {
 	p.AfterProcess()
 }
 
-func (m *Marmot) CloseWorkQueue() {
+func (m *Marmot) closeWorkQueue() {
 	close(m.workQueue)
-}
-
-func (m *Marmot) WaitForClose() {
-	m.Wait()
 }
 
 func calculateBaselineTime(num int) time.Duration {
