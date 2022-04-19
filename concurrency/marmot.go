@@ -1,70 +1,54 @@
 package concurrency
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
 
-var freshTime = time.Millisecond * 100
-
 // Marmot 采用同时并发执行，一般用于压测等同时并发场景
 type Marmot struct {
 	workQueue     chan Processor
-	concurrency   chan int
-	concurrentNum int
+	concurrencyCh chan int
+	concurrentNum uint
 	baselineTime  time.Duration
+	isWorkDone    chan bool
 	sync.WaitGroup
 }
 
-func NewMarmot(queueLength int, concurrentNum int) *Marmot {
+func NewMarmot(queueLength int, concurrentNum uint) *Marmot {
 	return &Marmot{
 		workQueue:     make(chan Processor, queueLength),
-		concurrency:   make(chan int, concurrentNum),
+		concurrencyCh: make(chan int, concurrentNum),
 		concurrentNum: concurrentNum,
 		baselineTime:  calculateBaselineTime(concurrentNum),
+		isWorkDone:    make(chan bool, 1),
 	}
 }
+
+var _ Worker = &Marmot{}
 
 func (m *Marmot) AddProcessor(processor Processor) {
 	m.workQueue <- processor
 }
 
 func (m *Marmot) StartWork() {
-	qps := 0
 	for p := range m.workQueue {
 		process := p
-		if qps >= m.concurrentNum {
-			time.Sleep(time.Second)
-			qps = 0
-		}
-
 		m.Add(1)
-		qps++
-		m.concurrency <- 1
+		m.concurrencyCh <- 1
 
 		go m.doWork(process)
 	}
 }
 
-func (m *Marmot) WaitForClose() {
-	m.isEmptyQueue()
-	m.Wait()
-	m.closeWorkQueue()
+func (m *Marmot) WorkDone() {
+	m.isWorkDone <- true
 }
 
-// TODO: to be optimized
-func (m *Marmot) isEmptyQueue() {
-	t := time.NewTicker(freshTime)
-	for {
-		select {
-		case <-t.C:
-			fmt.Println(len(m.workQueue))
-			if len(m.workQueue) == 0 {
-				return
-			}
-		}
-	}
+func (m *Marmot) WaitForClose() {
+	<-m.isWorkDone
+	m.Wait()
+	m.closeWorkQueue()
 }
 
 func (m *Marmot) doWork(p Processor) {
@@ -76,7 +60,7 @@ func (m *Marmot) doWork(p Processor) {
 		}
 
 		m.Done()
-		<-m.concurrency
+		<-m.concurrencyCh
 	}(start)
 
 	p.PreProcess()
@@ -88,7 +72,7 @@ func (m *Marmot) closeWorkQueue() {
 	close(m.workQueue)
 }
 
-func calculateBaselineTime(num int) time.Duration {
+func calculateBaselineTime(num uint) time.Duration {
 	if num <= 0 {
 		return time.Second
 	}

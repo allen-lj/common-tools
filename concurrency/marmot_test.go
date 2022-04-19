@@ -1,17 +1,21 @@
 package concurrency
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestNewMarmot(t *testing.T) {
 	m := NewMarmot(3, 1)
-	m.AddProcessor(&MockProcessor{})
+	m.AddProcessor(&MockProcessor{name: "one"})
+	m.AddProcessor(&MockProcessor{name: "two"})
+	m.AddProcessor(&MockProcessor{name: "three"})
 	go m.StartWork()
+	go func() {
+		time.Sleep(time.Second * 3)
+		m.WorkDone()
+	}()
 	m.WaitForClose()
 }
 
-type MockProcessor struct {
-}
 
-func (m *MockProcessor) PreProcess()   {}
-func (m *MockProcessor) DoProcess()    {}
-func (m *MockProcessor) AfterProcess() {}

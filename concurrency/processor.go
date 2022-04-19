@@ -5,3 +5,10 @@ type Processor interface {
 	DoProcess()
 	AfterProcess()
 }
+
+type Worker interface {
+	AddProcessor(processor Processor)
+	StartWork()
+	WaitForClose()
+	WorkDone()
+}

@@ -1,8 +1,16 @@
 # common-tools
 ## 工具包
 ### 并发
+在并发的世界，经常会遇到两种需求：  
++ 同时执行多少任务
++ 按照指定速率执行任务  
+
+Marmot 和 BumbleBee两个工具类正好覆盖这两种场景：  
+- Marmot通过指定同时执行任务数来执行任务
+- BumbleBee则是以固定速率来执行任务
+
 #### Marmot(土拨鼠)
-Marmot实现方式是以指定并发数同时运行，使用场景一般以同时并发请求的压力测试场景.
+Marmot实现方式是以每秒N个并发同时运行来进行任务，一般在以同时并发请求的压力测试的场景中使用.
 >Demo如下:
 ```
 m := NewMarmot(queueLength,concurrentNum)
@@ -11,7 +19,8 @@ go m.StartWork()
 m.AddProcessor(&MockProcessor{})
 m.AddProcessor(&MockProcessor{})
 ...
-
+// work done
+m.WorkDone()
 m.WaitForClose()
 
 type MockProcessor struct {
@@ -24,6 +33,21 @@ func (m *MockProcessor) DoProcess()    {
   // the main process
 }
 func (m *MockProcessor) AfterProcess() {
-  // 
+  // do something after work
 }
+```
+#### BumbleBee(大黄蜂)
+BumbleBee通过生成令牌的方式来进行并发任务处理.
+>Demo如下:
+```
+b := NewBumbleBee(3,1)
+b.AddProcessor(&MockProcessor{})
+b.AddProcessor(&MockProcessor{})
+b.AddProcessor(&MockProcessor{})
+go b.StartWork()
+
+// work done
+b.WorkDone()
+b.WaitForClose()
+
 ```
