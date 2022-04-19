@@ -1,13 +1,13 @@
 # common-tools
 ## 工具包
 ### 并发
-在并发的世界，经常会遇到两种需求：  
+在并发的世界，经常会遇到下面两种需求：  
 1. 并发执行多个任务
 2. 按照指定速率执行任务  
 
 Marmot 和 BumbleBee两个工具类正好覆盖这两种场景：  
-- Marmot通过指定并行任务数来执行任务
-- BumbleBee则是以固定速率的方式来执行任务
+- Marmot是通过指定并发任务数来执行任务
+- BumbleBee则是以固定速率的方式来并发执行任务
 
 #### Marmot(土拨鼠)
 Marmot 以每秒N个并发来同时执行任务。使用场景一般在同时并发执行的压力测试场景.
@@ -37,7 +37,7 @@ func (m *MockProcessor) AfterProcess() {
 }
 ```
 #### BumbleBee(大黄蜂)
-BumbleBee通过生成令牌的方式来进行并发任务处理.
+BumbleBee 通过生成令牌的方式来进行并发任务处理.
 >Demo如下:
 ```
 b := NewBumbleBee(3,1)
