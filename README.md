@@ -13,7 +13,7 @@ Marmot 和 BumbleBee两个工具类正好覆盖这两种场景：
 Marmot 以每秒N个并发来同时执行任务。使用场景一般在同时并发执行的压力测试场景.
 >Demo如下:
 ```
-m := NewMarmot(queueLength,concurrentNum)
+m := NewMarmot(2,1)
 go m.StartWork()
 
 m.AddProcessor(&MockProcessor{})

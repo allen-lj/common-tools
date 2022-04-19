@@ -11,11 +11,8 @@ func TestNewMarmot(t *testing.T) {
 	m.AddProcessor(&MockProcessor{name: "two"})
 	m.AddProcessor(&MockProcessor{name: "three"})
 	go m.StartWork()
-	go func() {
-		time.Sleep(time.Second * 3)
-		m.WorkDone()
-	}()
+
+	time.Sleep(time.Second * 3)
+	m.WorkDone()
 	m.WaitForClose()
 }
-
-

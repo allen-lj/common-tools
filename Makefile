@@ -28,7 +28,7 @@ build: set-env
 
 test: fmt test-case
 test-case: set-env
-	$(GOTEST) -race -cover -coverprofile=coverage.out $(GOPKGS)
+	$(GOTEST) -cover -coverprofile=coverage.out $(GOPKGS)
 
 fmt:
 	go fmt ./...

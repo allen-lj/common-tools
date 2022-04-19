@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewBumbleBee(t *testing.T) {
-	b := NewBumbleBee(3,1)
+	b := NewBumbleBee(3, 1)
 	b.AddProcessor(&MockProcessor{name: "one"})
 	b.AddProcessor(&MockProcessor{name: "two"})
 	b.AddProcessor(&MockProcessor{name: "three"})
