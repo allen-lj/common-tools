@@ -1,6 +1,7 @@
 package concurrency
 
 import (
+	"github.com/allen-lj/common-tools/util"
 	"sync"
 	"time"
 )
@@ -16,6 +17,9 @@ type Marmot struct {
 }
 
 func NewMarmot(queueLength int, concurrentNum uint) *Marmot {
+	util.Assert(concurrentNum <= 0, "the %s must be greater than 0", "concurrentNum")
+	util.Assert(queueLength <= 0, "the %s must be greater than 0", "queueLength")
+
 	return &Marmot{
 		workQueue:     make(chan Processor, queueLength),
 		concurrencyCh: make(chan int, concurrentNum),

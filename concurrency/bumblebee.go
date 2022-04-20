@@ -1,6 +1,7 @@
 package concurrency
 
 import (
+	"github.com/allen-lj/common-tools/util"
 	"sync"
 	"time"
 )
@@ -14,10 +15,9 @@ type BumbleBee struct {
 	sync.WaitGroup
 }
 
-func NewBumbleBee(queueLength int, concurrentNum uint) *BumbleBee {
-	if concurrentNum <= 0 {
-		panic("the concurrent number must be greater than 1")
-	}
+func NewBumbleBee(queueLength uint, concurrentNum uint) *BumbleBee {
+	util.Assert(concurrentNum <= 0, "the %s must be greater than 0", "concurrentNum")
+	util.Assert(queueLength <= 0, "the %s must be greater than 0", "queueLength")
 
 	return &BumbleBee{
 		workQueue:     make(chan Processor, queueLength),
